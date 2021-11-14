@@ -9,12 +9,11 @@ class LoginController
     public function Login($request, $response, $args)
     {
       $parametros = $request->getParsedBody();
-
         $usuario = $parametros['usuario'];
         $clave = $parametros['clave'];
         $perfil = $parametros['perfil'];
 
-        $datos = array('usuario' => $usuario, 'perfil' => $perfil, 'clave' => $clave);
+        $datos = array('usuario' => $usuario, 'perfil' => $perfil);
 
         $token = AuthTokenMW::CrearToken($datos);
         $payload = json_encode(array('jwt' => $token));

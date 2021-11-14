@@ -42,15 +42,21 @@ class Producto
         }
     }
 
-    // public static function obtenerUsuario($usuario)
-    // {
-    //     $objAccesoDatos = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, clave FROM usuarios WHERE usuario = :usuario");
-    //     $consulta->bindValue(':usuario', $usuario, PDO::PARAM_STR);
-    //     $consulta->execute();
+    public static function obtenerProducto($productoId)
+    {
+        try{
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM productos WHERE id = :productoId");
+            $consulta->bindValue(':productoId', $productoId, PDO::PARAM_INT);
+            $consulta->execute();
 
-    //     return $consulta->fetchObject('Usuario');
-    // }
+            return $consulta->fetchObject('Producto');
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
+    }
 
     // public static function modificarUsuario($nombre, $id)
     // {

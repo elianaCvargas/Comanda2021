@@ -10,6 +10,7 @@ class Pedido
     public $precioTotal;
     public $fecha;
     public $empleadoId;
+    public $productoId;
 
     public function crearPedido()
     {
@@ -51,17 +52,23 @@ class Pedido
         }
     }
     
-    public  function ToPedido($codigo, $mesaId, $clienteId, $empleadoId, $foto)
+    public  function ToPedido($mesaId, $empleadoId, $foto, $productoId, $fecha)
     {
-        $this->codigo = $codigo;
+        $this->codigo = random_bytes(5);
         $this->mesaId = $mesaId;
-        $this->clienteId = $clienteId;
         $this->empleadoId = $empleadoId;
         $this->foto = $foto;
+        $this->productoId = $productoId;
+        $this->fecha = $fecha;
     }
 
-    public function PedidoCompare($productoA, $productoB)
+    public function PedidoCompare($pedidoA, $pedidoB)
     {
-        return $productoA->codigo === $productoB->codigo;
+        return $pedidoA->codigo === $pedidoB->codigo;
+    }
+
+    public function SetCodigo(){
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $this->codigo = substr(str_shuffle($permitted_chars), 0, 5);
     }
 }

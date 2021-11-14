@@ -6,6 +6,7 @@ class UsuarioController extends Usuario implements IApiUsable
 {
     public function CargarUno($request, $response, $args)
     {
+        // $header = $request->getHeaderLine('Authorization');
         $parametros = $request->getParsedBody();
 
         $usuario = $parametros['usuario'];
@@ -13,7 +14,6 @@ class UsuarioController extends Usuario implements IApiUsable
         $nombre = $parametros['nombre'];
         $apellido = $parametros['apellido'];
         $tipo = $parametros['tipo'];
-
         // Creamos el usuario
         $usr = new Usuario();
         $usr->ToUsuario($nombre, $apellido, $usuario, $clave, $tipo);

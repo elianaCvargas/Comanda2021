@@ -82,7 +82,7 @@ class AuthTokenMW
         catch(Exception $e) {
             
                 $response->getBody()
-                ->write(json_encode(array("message" => $e->getMessage())));
+                ->write(json_encode(array("message" => 'Algo no esta bien..'.$e->getMessage())));
                 return $response;  
         }
 
@@ -94,15 +94,18 @@ class AuthTokenMW
                 
         }
 
-            $tokenData = AuthTokenMW::ObtenerData($token);
+        $tokenData = AuthTokenMW::ObtenerData($token);
             // var_dump($tokenData);
-            if($tokenData->perfil == PerfilUsuarioEnum::socio)
-            {
-                return $handler->handle($request);
-            }else {
-                $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
-                return $response;
-            }
+            // if($tokenData->perfil == PerfilUsuarioEnum::socio)
+            // {
+        $request = $request->withAttribute('perfil', $tokenData->perfil);
+        $request = $request->withAttribute('usuario', $tokenData->usuario);
+        $request = $request->withAttribute('clave', $tokenData->clave);
+        return $handler->handle($request);
+            // }else {
+            //     $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+            //     return $response;
+            // }
         
     }
 

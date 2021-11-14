@@ -1,45 +1,61 @@
 <?php
 require_once './models/Pedido.php';
+require_once './cross/fileHelper.php';
 require_once './interfaces/IApiUsable.php';
 
 class PedidoController extends Pedido implements IApiUsable
 {
     public function CargarUno($request, $response, $args)
     {
+        $empleadoId = $request->getAttribute('usuarioId');
+        date_default_timezone_set("America/Argentina/Buenos_Aires");
         $parametros = $request->getParsedBody();
-
-        $codigo = $parametros['codigo'];
         $mesaId = $parametros['mesaId'];
-        $clienteId = $parametros['clienteId'];
-        $empleadoId = $parametros['empleadoId'];
-        // $precioTotal = $parametros['precioTotal'];
-        $foto = $parametros['foto'];
-        $fotoPath = "path";
+        $nombreCliente = $parametros['clienteNombre'];
+      //el mozo entra por token
+        // $empleadoId = $parametros['empleadoId'];
+        $productoId = $parametros['productoId'];
+        $foto = $_FILES['foto'];
+       
         $pedido = new Pedido();
-        $pedido->ToPedido($codigo, intval($mesaId), intval($clienteId), intval($empleadoId), $fotoPath);
-        $pedido->fecha = date("Y/m/d");
-        try
-        {
-          $listaPedidos = $pedido->obtenerTodos();
-          if($listaPedidos != null && count($listaPedidos) > 0)
-          {
-             
-              foreach($listaPedidos as $pedidoDb)
-              {
-                 $pedidoComparison = $pedido->PedidoCompare($pedido, $pedidoDb);
-                  if($pedidoComparison)
-                  {
-                    $payload = json_encode(array("mensaje" => "La mesa ya existe"));
-                    $response->getBody()->write($payload);
-                    return $response->withHeader('Content-Type', 'application/json');
-                  }
-              }
-          }
+        $fecha = date("Y/m/d");
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $codigo = substr(str_shuffle($permitted_chars), 0, 5);
+          // $empleado = Usuario::obtenerUsuario($empleadoId);
+
+        $producto = Producto::obtenerProducto($productoId);
+        try{
+         $fotoPath = File::GuardarImagen($foto, $nombreCliente,  $codigo, $fecha);
         }
-        catch(PDOException $e){
-          $error = json_encode(array("mensaje" => "Error al crear el usuario: ".$e->getMessage()));
+        catch(Exception $e){
+          $error = json_encode(array("mensaje" => "Error al guardar la imagen: ".$e->getMessage()));
           $response->getBody()->write($error);
         }
+        
+        $pedido->ToPedido(intval($mesaId), intval($empleadoId), $fotoPath, intval($productoId), $fecha);
+          
+        // try
+        // {
+        //   $listaPedidos = $pedido->obtenerTodos();
+        //   if($listaPedidos != null && count($listaPedidos) > 0)
+        //   {
+             
+        //       foreach($listaPedidos as $pedidoDb)
+        //       {
+        //          $pedidoComparison = $pedido->PedidoCompare($pedido, $pedidoDb);
+        //           if($pedidoComparison)
+        //           {
+        //             $payload = json_encode(array("mensaje" => "La mesa ya existe"));
+        //             $response->getBody()->write($payload);
+        //             return $response->withHeader('Content-Type', 'application/json');
+        //           }
+        //       }
+        //   }
+        // }
+        // catch(PDOException $e){
+        //   $error = json_encode(array("mensaje" => "Error al crear el usuario: ".$e->getMessage()));
+        //   $response->getBody()->write($error);
+        // }
 
         $pedido->crearPedido();
         $payload = json_encode(array("mensaje" => "Pedido creado con exito"));

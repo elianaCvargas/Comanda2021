@@ -13,7 +13,7 @@ require_once './controllers/MesaController.php';
 require_once './controllers/LoginController.php';
 require_once './controllers/PedidoController.php';
 require_once './db/AccesoDatos.php';
-require_once './middlewares/ValidaParamsMW.php';
+require_once './middlewares/ValidatorMW.php';
 require_once './middlewares/AuthTokenMW.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -34,7 +34,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('[/]', \UsuarioController::class . ':TraerTodos');
     $group->get('/{usuario}', \UsuarioController::class . ':TraerUno');
-    $group->post('[/]', \UsuarioController::class . ':CargarUno')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+    $group->post('[/]', \UsuarioController::class . ':CargarUno')->add(\ValidatorMW::class . ':CheckPerfilSocio')->add(\AuthTokenMW::class . ':AutenticarUsuario');
     $group->put('[/]', \UsuarioController::class . ':ModificarUno');
     // $group->post('/{usuario}', \UsuarioController::class . ':BorrarUsuario');
   });
@@ -50,7 +50,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   });
 
   $app->group('/pedidos', function (RouteCollectorProxy $group) {
-    $group->post('[/]', \PedidoController::class . ':CargarUno');
+    $group->post('[/]', \PedidoController::class . ':CargarUno')->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
     $group->get('[/]', \PedidoController::class . ':TraerTodos');
   });
 
@@ -61,7 +61,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   //->add(\MiClase::class . ':Login')
 
   $app->group('/login', function (RouteCollectorProxy $group) {
-    $group->post('[/]', \LoginController::class . ':Login')->add(\ValidaParamsMW::class . ':VerificarParamsLogin');
+    $group->post('[/]', \LoginController::class . ':Login')->add(\ValidatorMW::class . ':VerificarParamsLogin');
   });
 // Run app
 $app->run();
