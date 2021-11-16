@@ -6,6 +6,7 @@ abstract class EstadoMesaEnum
     const comiendo = 2;
     const pagando = 3;
     const cerrada = 4;
+    const asignada = 5;
     // etc.
 
        public static function GetDescription($intValue){
@@ -22,6 +23,9 @@ abstract class EstadoMesaEnum
                 break;
             case 4:
                 return "Cerrado";
+                break;
+            case 5:
+                return "Asignada";
                 break;
         }
     }

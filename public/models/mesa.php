@@ -23,7 +23,6 @@ class Mesa
         catch(PDOException $e)
         {
             throw $e;
-            // echo ''Error: '' .$e->getMessage() . ''<br/> '';
         }
         
     }
@@ -40,6 +39,25 @@ class Mesa
         {
             throw $e;
         }
+    }
+
+    public static function obtenerMesa($mesaId)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas WHERE mesaId = :mesaId");
+        $consulta->bindValue(':mesaId', $mesaId, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Pedido');
+    }
+
+    public static function ModificarEstado($estado, $id)
+    {
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estado = :estado  WHERE id = :id");
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+        $consulta->execute();
     }
     
     public  function ToMesa($codigo, $numeroMesa, $estado)

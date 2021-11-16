@@ -74,4 +74,39 @@ class ValidatorMW
       ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
       return $response;  
     }
+
+    public static function CheckPerfilMozoYCliente(Request $request,Handler $handler)
+    {
+      $response = new Response();
+      $perfil = $request->getAttribute('perfil');
+      if($perfil == PerfilUsuarioEnum::mozo || $perfil == PerfilUsuarioEnum::cliente)
+      {
+        return $handler->handle($request);
+
+      }else {
+        $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+        return $response;
+      }
+      
+      $response->getBody()
+      ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
+      return $response;  
+    }
+
+    public static function CheckEmpleados(Request $request,Handler $handler)
+    {
+      $response = new Response();
+      $perfil = $request->getAttribute('perfil');
+      if($perfil =! PerfilUsuarioEnum::cliente)
+      {
+          $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+          return $response;
+      }else {
+         return $handler->handle($request);
+      }
+      
+      $response->getBody()
+      ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
+      return $response;  
+    }
 }

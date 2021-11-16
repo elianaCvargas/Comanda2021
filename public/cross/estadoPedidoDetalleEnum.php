@@ -1,7 +1,6 @@
 <?php
 abstract class EstadoPedidoEnum
 {
-
     const pendiente = 1;
     const Preparando = 2;
     const listo = 3;

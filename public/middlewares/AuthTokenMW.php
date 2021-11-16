@@ -95,17 +95,13 @@ class AuthTokenMW
         }
 
         $tokenData = AuthTokenMW::ObtenerData($token);
-            // var_dump($tokenData);
-            // if($tokenData->perfil == PerfilUsuarioEnum::socio)
-            // {
+ 
         $request = $request->withAttribute('perfil', $tokenData->perfil);
         $request = $request->withAttribute('usuario', $tokenData->usuario);
-        $request = $request->withAttribute('clave', $tokenData->clave);
+        $usuario =  Usuario::obtenerUsuarioPorEmail( $tokenData->usuario);
+        $request = $request->withAttribute('usuarioId',$usuario->id);
+
         return $handler->handle($request);
-            // }else {
-            //     $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
-            //     return $response;
-            // }
         
     }
 

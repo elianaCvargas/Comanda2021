@@ -50,8 +50,11 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   });
 
   $app->group('/pedidos', function (RouteCollectorProxy $group) {
-    $group->post('[/]', \PedidoController::class . ':CargarUno')->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
-    $group->get('[/]', \PedidoController::class . ':TraerTodos');
+    $group->get('[/]', \PedidoController::class . ':TraerTodos')
+      ->add(\ValidatorMW::class . ':CheckEmpleados')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+    $group->post('/fotos', \PedidoController::class . ':CargarFoto')->add(\ValidatorMW::class . ':CheckPerfilMozoYCliente')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+    $group->post('[/]', \PedidoController::class . ':CargarUno')
+      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
   });
 
   $app->group('/credenciales', function (RouteCollectorProxy $group) {
