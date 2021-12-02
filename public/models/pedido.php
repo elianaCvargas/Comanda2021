@@ -109,7 +109,6 @@ class Pedido
         $objAccesoDato = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos SET foto = :foto  WHERE id = :id");
         $consulta->bindValue(':foto', $foto, PDO::PARAM_STR);
-        // $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
     }
