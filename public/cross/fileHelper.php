@@ -25,26 +25,60 @@ class File
         return $lineas;
     }
 
-    static function ArchivarSVC($data, $root, $modo)
+    static function ArchivarSVC($header, $lista, $root, $filename, $extension)
     {
-        $arraydata = [[$data->_color, $data->_marca, $data->_precio, $data->_fecha]];
-        $file = fopen($root, $modo);
+        if(count($lista) > 0)
+        {
+            $delimiter = ","; 
+            $filename = "pedidos-lista_" . date('Y-m-d') . ".csv"; 
+            // Create a file pointer 
+            $f = fopen($root.$filename, 'w');  
+             
+            // Set column headers 
+            fputcsv($f, $header, $delimiter); 
+            for($i = 0; $i < count($lista); $i++)
+            {
+                fputcsv($f, $lista[$i], $delimiter); 
+            }
+          
+            fseek($f, 0); 
+             
+            // Set headers to download file rather than displayed 
+            header('Content-Type: text/csv'); 
+            header('Content-Disposition: attachment; filename="' . $filename . '";'); 
+             
+            //output all remaining data on a file pointer 
+            // fpassthru($f); 
+        }
+       
+    }
+
+    static function ReadFileCSV($root)
+    {
+        $file = fopen($root, 'r');
+        $lineas = [];
 
         if(!$file)
         {
-            echo "error";
+            echo "Error";
         }
         else
         {
-            foreach($arraydata as $row)
-            {
-                fputcsv($file,  $row, ";");
+            // while(!feof($file))
+            // {
+            //     $retorno = fgetcsv($file);
+            //     // var_dump($retorno);
+            //     array_push($lineas, $retorno);
+            //     return $lineas;
+            // }
+            // read each line in CSV file at a time
+            while (($row = fgetcsv($file)) !== false) {
+                $lineas[] = $row;
             }
-
-            echo "se guardo el elemento: con formato CSV<br/>";
         }
 
         fclose($file);
+        return $lineas;
     }
 
 

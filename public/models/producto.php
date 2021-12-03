@@ -28,7 +28,7 @@ class Producto
         
     }
 
-    public static function obtenerTodos()
+    public static function ObtenerTodos()
     {
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
@@ -88,7 +88,7 @@ class Producto
     public function ProductoCompare($productoA, $productoB)
     {
         return $productoA->descripcion === $productoB->descripcion 
-        && $productoA->sectorId === $productoB->sectorId
-        && $productoA->tipoProductoId === $productoB->tipoProductoId;
+        && $productoA->sectorId == $productoB->sectorId
+        && $productoA->tipoProductoId == $productoB->tipoProductoId;
     }
 }

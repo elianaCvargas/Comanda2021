@@ -1,4 +1,5 @@
 <?php
+require_once './views/pedidoDetalleCSV.php';
 
 class Pedido
 {
@@ -10,6 +11,7 @@ class Pedido
     public $precioTotal;
     public $fecha;
     public $empleadoId;
+
 
     public function crearPedido()
     {
@@ -111,5 +113,32 @@ class Pedido
         $consulta->bindValue(':foto', $foto, PDO::PARAM_STR);
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
+    }
+
+    public static function obtenerTodosDetalle()
+    {
+
+        try{
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, c.nombre, c.apellido, c.email as emailCliente, u.usuario as emailMozo, p.precioTotal, p.fecha   FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN clientes c on c.id = p.clienteId
+            INNER JOIN mesas m on m.id = p.mesaId
+            ORDER BY fecha");
+            $consulta->execute();
+            return $consulta->fetchAll(PDO::FETCH_CLASS, 'PedidoDetalleCSV');
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
+    }
+    
+    public static function CargarPedidosCSV()
+    {
+       $listaPedidos =  Pedido::obtenerTodosDetalle();
+       
+       return $listaPedidos;
+
     }
 }

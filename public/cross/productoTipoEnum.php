@@ -29,5 +29,32 @@ abstract class ProductoTipoEnum
             break;
         }
     }
+
+    public static function GetEnumerator($descripcion){
+        $descSinEspacios = str_replace( ' ', '', strtolower($descripcion));
+        echo $descSinEspacios;
+        switch($descSinEspacios)
+        {
+            case "bebidasalcoholicas":
+                return 1;
+                break;
+            case "bebidassinalcohol":
+                return 2;
+                break;
+            case "snacks":
+                return 3;
+                break;
+            case "dulces":
+                return 4;
+                break;
+            case "comida":
+                return 5;
+                break;
+            default:
+            return "-";
+            
+            break;
+        }
+    }
 }
 

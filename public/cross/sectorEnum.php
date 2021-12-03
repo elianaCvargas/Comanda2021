@@ -26,20 +26,29 @@ abstract class SectorEnum
         }
     }
 
-    // public static function GetDescription($intValue){
-    //     switch($intValue)
-    //     {
-    //         case 1:
-    //             break;
-    //         case 2:
-    //             break;
-    //         case 3:
-    //             break;
-    //         case 4:
-    //             break;
-    //         default:
-    //         break;
-    //     }
-    // }
+    public static function GetEnumerator($descripcion){
+        $descSinEspacios = str_replace( ' ', '', strtolower($descripcion));
+
+        switch($descSinEspacios)
+        {
+            case "entrada":
+                return 1;
+                break;
+            case "patiotrasero":
+                return 2;
+                break;
+            case "cocina":
+                return 3;
+                break;
+            case "candyBar":
+                return 4;
+                break;
+           
+            default:
+            return "-";
+            
+            break;
+        }
+    }
 }
 

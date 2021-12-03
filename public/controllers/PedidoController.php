@@ -9,6 +9,7 @@ require_once './cross/estadoMesaEnum.php';
 
 class PedidoController extends Pedido implements IApiUsable
 {
+  public  $path = "cross/archivos/";
     public function CargarUno($request, $response, $args)
     {
         $empleadoId = $request->getAttribute('usuarioId');
@@ -86,6 +87,7 @@ class PedidoController extends Pedido implements IApiUsable
         catch(Exception $e){
           $error = json_encode(array("mensaje" => "Error al guardar la imagen en la DB: ".$e->getMessage()));
           $response->getBody()->write($error);
+          return $response;
         }
     }
 
@@ -123,5 +125,29 @@ class PedidoController extends Pedido implements IApiUsable
 
     }
 
+    public function DownloadCSV($request, $response, $args)
+    {
+      $filename = "pedidos-lista_".date('Y-m-d');
+      $extension = ".csv"; 
+      $listaPedidos = Pedido::CargarPedidosCSV();
+      $arrayPedidos = [];
+      $header = array('ID', 'COD PEDIDO', 'COD MESA', 'CLIENTE', 'EMAIL', 'MOZO', 'PRECIO TOTAL', 'FECHA'); 
+      foreach($listaPedidos as $pedido)
+      {   $apellido = ($pedido->apellido && $pedido->apellido != null)? $pedido->apellido : "-";
+          $nombre = ($pedido->nombre && $pedido->nombre != null)? $pedido->nombre : "-";
+          $pedido->cliente = ($nombre != "-" && $apellido != "-")? $apellido.", ".$nombre: "-";
+          $lineData = array($pedido->id, $pedido->codigoPedido,  $pedido->codigoMesa, $pedido->cliente ,
+           $pedido->emailCliente, $pedido->emailMozo, $pedido->precioTotal, strval($pedido->fecha)); 
+          array_push($arrayPedidos, $lineData);
+      }
+
+      File::ArchivarSVC($header, $arrayPedidos, $this->path, $filename, $extension);
+      $mensaje = json_encode(array("mensaje" => "Descarga exitosa."));
+          $response->getBody()->write($mensaje);
+          return $response;
+    }
+
+
+    
 }
 

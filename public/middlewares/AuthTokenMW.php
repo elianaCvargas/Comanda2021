@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class AuthTokenMW
 {
-    private static $claveSecreta = 'T3sT$JWT';
+      private static $claveSecreta = 'T3sT$JWT';
     private static $tipoEncriptacion = ['HS256'];
 
     public static function CrearToken($datos)
@@ -95,11 +95,9 @@ class AuthTokenMW
         }
 
         $tokenData = AuthTokenMW::ObtenerData($token);
- 
         $request = $request->withAttribute('perfil', $tokenData->perfil);
         $request = $request->withAttribute('usuario', $tokenData->usuario);
-        $usuario =  Usuario::obtenerUsuarioPorEmail( $tokenData->usuario);
-        $request = $request->withAttribute('usuarioId',$usuario->id);
+
 
         return $handler->handle($request);
         
@@ -123,5 +121,4 @@ class AuthTokenMW
         return sha1($aud);
     }
 
-    
 }
