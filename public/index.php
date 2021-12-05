@@ -55,11 +55,14 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   $app->group('/pedidos', function (RouteCollectorProxy $group) {
     $group->get('[/]', \PedidoController::class . ':TraerTodos')
       ->add(\ValidatorMW::class . ':CheckEmpleados')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+      
     $group->post('/fotos', \PedidoController::class . ':CargarFoto')->add(\ValidatorMW::class . ':CheckPerfilMozoYCliente')->add(\AuthTokenMW::class . ':AutenticarUsuario');
     $group->post('[/]', \PedidoController::class . ':CargarUno')
       ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
     $group->get('/descarga-csv', \PedidoController::class . ':DownloadCSV');
+    $group->get('/recibo-pdf', \PedidoController::class . ':DownloadPdf');
+    
 
     
   });
@@ -71,7 +74,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   //->add(\MiClase::class . ':Login')
 
   $app->group('/login', function (RouteCollectorProxy $group) {
-    $group->post('[/]', \LoginController::class . ':Login')->add(\ValidatorMW::class . ':VerificarParamsLogin');
+    $group->post('[/]', \LoginController::class . ':Login');
   });
 // Run app
 $app->run();

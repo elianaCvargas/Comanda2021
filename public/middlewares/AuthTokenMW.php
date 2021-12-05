@@ -72,7 +72,6 @@ class AuthTokenMW
         $token = trim(explode("Bearer", $header)[1]);
         
         $esValido = false;
-        // $tokenData = "";
         $response = new Response();
 
         try {
@@ -86,7 +85,6 @@ class AuthTokenMW
                 return $response;  
         }
 
-        // var_dump($esValido);
         if(!$esValido) {
             $response->getBody()->write(json_encode(array("message" => 'Algo no esta bien..')));
             return $response;
@@ -97,6 +95,7 @@ class AuthTokenMW
         $tokenData = AuthTokenMW::ObtenerData($token);
         $request = $request->withAttribute('perfil', $tokenData->perfil);
         $request = $request->withAttribute('usuario', $tokenData->usuario);
+        $request = $request->withAttribute('usuarioId', $tokenData->usuarioId);
 
 
         return $handler->handle($request);

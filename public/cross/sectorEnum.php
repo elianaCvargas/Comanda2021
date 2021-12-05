@@ -10,16 +10,16 @@ abstract class SectorEnum
         switch($intValue)
         {
             case 1:
-                return "Entrada";
+                return "Entrada";//tragos y vinos
                 break;
             case 2:
-                return "Patio Trasero";
+                return "Patio Trasero";//barra de choperas de cerveza artesanal
                 break;
             case 3:
                 return "Cocina";
                 break;
             case 4:
-                return "CandyBar";
+                return "CandyBar";//postres artesanales
                 break;
             default:
             break;

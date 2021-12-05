@@ -50,8 +50,18 @@ class Usuario
     public static function obtenerUsuario($usuario)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, clave FROM usuarios WHERE usuario = :usuario");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, nombre, apellido, tipoUsuarioId FROM usuarios WHERE usuario = :usuario");
         $consulta->bindValue(':usuario', $usuario, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+    public static function obtenerUsuarioPorId($usuarioId)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, nombre, apellido, tipoUsuarioId FROM usuarios WHERE id = :usuarioId");
+        $consulta->bindValue(':usuarioId', $usuarioId, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchObject('Usuario');
@@ -77,15 +87,27 @@ class Usuario
         $consulta->execute();
     }
 
-    public static function obtenerUsuarioPorUsuarioYClave($usuario, $clave)
+    public static function obtenerUsuarioPorUsuario($usuario)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, clave FROM usuarios WHERE usuario = :usuario and clave = :clave");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM usuarios WHERE usuario = :usuario");
         $consulta->bindValue(':usuario', $usuario, PDO::PARAM_STR);
-        $consulta->bindValue(':clave', $clave, PDO::PARAM_STR);
         $consulta->execute();
 
         return $consulta->fetchObject('Usuario');
+    }
+
+    public static function obtenerUsuarioPorUsuarioYClave($usuario, $clave)
+    {
+        $usuario = Usuario::obtenerUsuarioPorUsuario($usuario);
+        // var_dump($usuario);
+        if($usuario && password_verify($clave, $usuario->clave))
+        {   
+            $usuario->clave = NULL;
+           return $usuario;
+        }
+
+        return null;
     }
 
     public static function obtenerUsuarioPorEmail($usuario)

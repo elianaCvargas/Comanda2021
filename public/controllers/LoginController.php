@@ -9,21 +9,28 @@ class LoginController
     public function Login($request, $response, $args)
     {
       $parametros = $request->getParsedBody();
-        $usuario = $parametros['usuario'];
-        $clave = $parametros['clave'];
-        $perfil = $parametros['perfil'];
-
-        $datos = array('usuario' => $usuario, 'perfil' => $perfil);
-
+      $usuario = $parametros['usuario'];
+      $clave = $parametros['clave'];
+    
+      $usuariofromDb =  Usuario::obtenerUsuarioPorUsuarioYClave($usuario, $clave);
+      if($usuariofromDb)
+      {
+        $datos = array('usuario' => $usuario, 'perfil' => $usuariofromDb->tipoUsuarioId, 'usuarioId' => $usuariofromDb->id);
+        $request = $request->withAttribute('usuarioId', $usuariofromDb->id);
+        // $empleadoId = $request->getAttribute('usuarioId');
+        // var_dump($empleadoId);
         $token = AuthTokenMW::CrearToken($datos);
         $payload = json_encode(array('jwt' => $token));
 
         $response->getBody()->write($payload);
         return $response
           ->withHeader('Content-Type', 'application/json');
+      }
+     
+      
+      $response->getBody()->write("No tiene permisos para ingresar.");
+      return $response
+        ->withHeader('Content-Type', 'application/json');
     }
-
-    //verificar token, verificar parametros, validar mozo
-
 }
 

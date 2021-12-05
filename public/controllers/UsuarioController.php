@@ -94,12 +94,10 @@ class UsuarioController extends Usuario implements IApiUsable
         $parametros = $request->getParsedBody();
 
         // $id = $parametros['id'];
-var_dump($parametros);
         
         $nombre = $parametros['nombre'];
         Usuario::obtenerUsuario($nombre);
         // Usuario::modificarUsuario($nombre);
-var_dump($nombre);
         $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
 
         $response->getBody()->write($payload);

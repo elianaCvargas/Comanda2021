@@ -1,5 +1,6 @@
 <?php
 require_once './views/pedidoDetalleCSV.php';
+require_once './cross/dateHelper.php';
 
 class Pedido
 {
@@ -39,11 +40,22 @@ class Pedido
 
     public static function obtenerTodos()
     {
+        $hoy = DateHelper::DateAMD();
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos");
+            $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, m.estado, pro.sectorId, pro.descripcion, p.empleadoId as mozoId, dp.empleadoId as empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
+            INNER JOIN mesas m on m.id = p.mesaId
+            INNER JOIN productos pro on pro.id = dp.productoid
+            WHERE fecha =:hoy
+            ORDER BY p.id, pro.sectorId, fecha");
+
+            $consulta->bindValue(':hoy', $hoy."%");
+
             $consulta->execute();
-            return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+            return $consulta->fetchAll(PDO::FETCH_CLASS, 'SocioPedidoView');
         }
         catch(PDOException $e)
         {
@@ -51,13 +63,52 @@ class Pedido
         }
     }
 
-    public static function obtenerTodosPorSector($sector)
+    public static function ObtenerPorSector($sectorId)
     {
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos");
+            $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, u.usuario as emailMozo, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
+            INNER JOIN mesas m on m.id = p.mesaId
+            INNER JOIN productos pro on pro.id = dp.productoid
+            WHERE pro.sectorId = :sectorId
+            WHERE fecha =:hoy
+            ORDER BY dp.estadoId");
+            $consulta->bindValue(':sectorId', $sectorId, PDO::PARAM_INT);
+            $consulta->bindValue(':hoy', DateHelper::DateAMD()."%");
+
+
             $consulta->execute();
-            return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+            return $consulta->fetchAll();
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
+    }
+
+    public static function ObtenerPorEmpleadoId($empleadoId)
+    {
+        try{
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, p.nombreCliente, pro.descripcion, dp.estadoId, m.estado, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
+            INNER JOIN mesas m on m.id = p.mesaId
+           
+            INNER JOIN productos pro on pro.id = dp.productoid
+            WHERE p.empleadoId = :empleadoId && fecha =:hoy && (dp.estadoId != 4 || dp.estadoId != 5)
+            order by p.id, dp.estadoId
+           ");
+            $consulta->bindValue(':empleadoId', intval($empleadoId), PDO::PARAM_INT);
+            $consulta->bindValue(':hoy', DateHelper::DateAMD()."%");
+
+
+            $consulta->execute();
+            return $consulta->fetchAll(PDO::FETCH_CLASS, 'MozoPedidoView');
         }
         catch(PDOException $e)
         {
@@ -139,6 +190,29 @@ class Pedido
        $listaPedidos =  Pedido::obtenerTodosDetalle();
        
        return $listaPedidos;
+
+    }
+
+    public static function BucarPedidoParaRecibo($pedidoId)
+    {
+        try{
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta
+            ("SELECT *   FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN clientes c on c.id = p.clienteId
+            INNER JOIN mesas m on m.id = p.mesaId
+            INNER JOIN detallesPedidos dp on dp.pedidoId = p.id
+            WHERE p.id = :pedidoId");
+            $consulta->bindValue(':pedidoId', $pedidoId, PDO::PARAM_INT);
+
+            $consulta->execute();
+            return $consulta->$consulta->fetchObject();
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
 
     }
 }

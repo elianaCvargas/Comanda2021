@@ -1,9 +1,11 @@
 <?php
-abstract class EstadoPedidoEnum
+abstract class EstadoPedidoDetalleEnum
 {
     const pendiente = 1;
-    const Preparando = 2;
-    const listo = 3;
+    const enPreparacion = 2;
+    const listoParaServir = 3;
+    const entregado = 4;
+    const cancelada = 5;
 
        public static function GetDescription($intValue){
         switch($intValue)
@@ -12,10 +14,16 @@ abstract class EstadoPedidoEnum
                 return "pendiente";
                 break;
             case 2:
-                return "Preparando";
+                return "En preparacion";
                 break;
             case 3:
-                return "listo";
+                return "Listo para servir";
+                break;
+            case 4:
+                return "Entregado";
+                break;
+            case 5:
+                return "Cancelada";
                 break;
         }
     }
