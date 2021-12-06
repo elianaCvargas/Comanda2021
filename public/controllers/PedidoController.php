@@ -6,7 +6,7 @@ require_once './models/detallePedido.php';
 require_once './cross/estadoPedidoDetalleEnum.php';
 require_once './cross/estadoMesaEnum.php';
 require_once './views/mozoPedidoView.php';
-require_once './views/socioPedidoView.php';
+require_once './views/pedidoDashboardView.php';
 
 
 class PedidoController extends Pedido implements IApiUsable
@@ -20,10 +20,9 @@ class PedidoController extends Pedido implements IApiUsable
         $mesaId = $parametros['mesaId'];
         $nombreCliente = $parametros['nombreCliente'];
         $productos = $parametros['productos'];
-        // var_dump($empleadoId);
         try
         {
-          Mesa::ModificarEstado(EstadoMesaEnum::asignada, $mesaId);
+          Mesa::ModificarEstado(EstadoMesaEnum::esperandoPedido, $mesaId);
         }
         catch(PDOException $e){
           $error = json_encode(array("mensaje" => "Error al modificar el estado de la mesa: ".$e->getMessage()));
@@ -43,6 +42,7 @@ class PedidoController extends Pedido implements IApiUsable
           return $response;
         }
        
+        $mensaje = "";
         foreach($productos as $producto)
         {
             $pedidoDetalle = new DetallePedido();
@@ -50,17 +50,29 @@ class PedidoController extends Pedido implements IApiUsable
             $productoString = json_encode($producto);
             $decodedProducto = json_decode($productoString);
             $productoDb = Producto::obtenerProducto($decodedProducto->id);
-            $pedidoDetalle->ToDetallePedido(intval($ultimoIdFromPedido) , $fecha, EstadoPedidoEnum::pendiente, intval($productoDb->id) , intval($decodedProducto->cantidad) );
-            try{
-              $pedidoDetalle->crearPedidoDetalle($pedidoDetalle);
+            if($productoDb)
+            {
+              echo "probar esto en  controllerde crear pedido";
+              $pedido->precioTotal = $pedido->precioTotal + $productoDb->precioUnitario;
+              $pedidoDetalle->ToDetallePedido(intval($ultimoIdFromPedido) , $fecha, EstadoPedidoDetalleEnum::pendiente, intval($productoDb->id) , intval($decodedProducto->cantidad) );
+              try{
+                $pedidoDetalle->crearPedidoDetalle($pedidoDetalle);
+                $mensaje = "Pedido generado con exito";
+              }
+              catch(PDOException $e){
+                $error = json_encode(array("mensaje" => "Error al crear el detalle del pedido: ".$e->getMessage()));
+                $response->getBody()->write($error);
+                return $response;
+              }
             }
-            catch(PDOException $e){
-              $error = json_encode(array("mensaje" => "Error al crear el detalle del pedido: ".$e->getMessage()));
-              $response->getBody()->write($error);
+            else{
+              //no deberia llegar nunca aca ya que el front deberia encargarse de mostrar solo productos existentes
+              $mensaje = "No se pudo generar los pedidos para los productos";
             }
+            
         }
 
-        $payload = json_encode(array("mensaje" => "Pedido creado con exito"));
+        $payload = json_encode(array("mensaje" => $mensaje));
               $response->getBody()->write($payload);
         return $response
                   ->withHeader('Content-Type', 'application/json');
@@ -114,6 +126,83 @@ class PedidoController extends Pedido implements IApiUsable
         // }
     }
 
+    public function TomarPedidoDetalle($request, $response, $args)
+    {
+        $empleadoId = $request->getAttribute('usuarioId');
+        $parametros = $request->getParsedBody();
+        $detallePedidoId = $parametros['detallePedidoId'];
+        $estadoId = $parametros['estadoId'];
+        $tiempoEstimado = $parametros['tiempoEstimado'];
+        try{
+          DetallePedido::IniciarPreparacion($estadoId, $detallePedidoId, $empleadoId, $tiempoEstimado);
+         }
+         catch(Exception $e){
+           $error = json_encode(array("mensaje" => "Error al Actualizar el pedido: ".$e->getMessage()));
+           $response->getBody()->write($error);
+         }
+
+         $payload = json_encode(array("mensaje" => "Pedido tomado."));
+         $response->getBody()->write($payload);
+         return $response
+           ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function ModificarEstadoPedidoDetalle($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $detallePedidoId = $parametros['detallePedidoId'];
+        $estadoId = $parametros['estadoId'];
+        try{
+          DetallePedido::ModificarEstado(EstadoPedidoDetalleEnum::listoParaServir, $detallePedidoId);
+         }
+         catch(Exception $e){
+           $error = json_encode(array("mensaje" => "Error al Actualizar el pedido: ".$e->getMessage()));
+           $response->getBody()->write($error);
+         }
+
+         $payload = json_encode(array("mensaje" => "Pedido actualizado."));
+         $response->getBody()->write($payload);
+         return $response
+           ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function CancelarPedidoDetalle($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $detallePedidoId = $parametros['detallePedidoId'];
+        try{
+          DetallePedido::ModificarEstado(EstadoPedidoDetalleEnum::cancelada, $detallePedidoId);
+         }
+         catch(Exception $e){
+           $error = json_encode(array("mensaje" => "Error al Actualizar el pedido: ".$e->getMessage()));
+           $response->getBody()->write($error);
+         }
+
+         $payload = json_encode(array("mensaje" => "Pedido actualizado."));
+         $response->getBody()->write($payload);
+         return $response
+           ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function EntregarPedidoDetalle($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+        $detallePedidoId = $parametros['detallePedidoId'];
+        $estadoId = $parametros['estadoId'];
+        try{
+          DetallePedido::EntregarPedido($estadoId, $detallePedidoId);
+         }
+         catch(Exception $e){
+           $error = json_encode(array("mensaje" => "Error al Actualizar el pedido: ".$e->getMessage()));
+           $response->getBody()->write($error);
+         }
+
+         $payload = json_encode(array("mensaje" => "Pedido entregado."));
+         $response->getBody()->write($payload);
+         return $response
+           ->withHeader('Content-Type', 'application/json');
+    }
+
     public function CargarFoto($request, $response, $args)
     {
       date_default_timezone_set("America/Argentina/Buenos_Aires");
@@ -143,70 +232,43 @@ class PedidoController extends Pedido implements IApiUsable
         }
     }
 
-    //vista para el socio
     public function TraerTodos($request, $response, $args)
     {
       $empleadoId = $request->getAttribute('usuarioId');
       $perfil = $request->getAttribute('perfil');
-
-    // public $empleado;
-    // public $mozo;
+      $lista = [];
       switch($perfil)
       {
         case PerfilUsuarioEnum::socio:
-          try{
-            $lista = Pedido::obtenerTodos();
-            $listaPedidos = [];
-            if($lista)
-            {
-              foreach($lista as $pedido)
-              {
-          // p.empleadoId as mozoId, dp.empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
-
-                $pedidoSocio = new SocioPedidoView();
-                $pedidoSocio->codigoMesa = $pedido->codigoMesa;
-                $pedidoSocio->codigoPedido = $pedido->codigoPedido;
-                $pedidoSocio->sector = SectorEnum::GetDescription($pedido->sectorId);
-                $pedidoSocio->descripcion = $pedido->descripcion;
-                $pedidoSocio->estadoPedido = EstadoPedidoDetalleEnum::GetDescription($pedido->estadoId);
-                $pedidoSocio->estadoMesa = EstadoMesaEnum::GetDescription($pedido->estado);
-                // $pedidoSocio->empleado = Usuario::obtenerUsuario($pedido->empleadoId);
-                // $pedidoSocio->mozo = Usuario::obtenerUsuario($pedido->mozoId);
-                array_push($listaPedidos, $pedidoSocio);
-               
-              }
-            }
-           
-            $payload = json_encode(array("lista Pedidos" => $listaPedidos));
-            $response->getBody()->write($payload);
-          }
-          catch(PDOException $e)
-          {
-              $error = json_encode(array("mensaje" => "Error al traer Los pedidos: ".$e->getMessage()));
-              $response->getBody()->write($error);
-          }
-
-          break;
         case PerfilUsuarioEnum::mozo:
           try{
-            $lista = Pedido::ObtenerPorEmpleadoId($empleadoId);
-            $listaMozo = [];
+            $lista = Pedido::obtenerTodos();
             if($lista)
             {
               foreach($lista as $pedido)
               {
-                  $item = new MozoPedidoView();
-                  $item->codigoMesa = $pedido->codigoMesa;
-                  $item->codigoPedido = $pedido->codigoPedido;
-                  $item->nombreCliente = $pedido->nombreCliente;
-                  $item->descripcion = $pedido->descripcion;
-                  $item->estadoPedido = EstadoPedidoDetalleEnum::GetDescription($pedido->estadoId);
-                  $item->estadoMesa = EstadoMesaEnum::GetDescription($pedido->estado);
+                $listaDetalle = DetallePedido::ObtenerFullDataPedidosDetalle($pedido->id);
 
-                 array_push($listaMozo, $item);
-              }
+                if($listaDetalle)
+                {
+                  foreach($listaDetalle as $detalle)
+                  {
+                    if($detalle->empleadoId != null)
+                    {
+                      $usuario = Usuario::obtenerUsuarioPorId($detalle->empleadoId);
+                      $listaDetalle->empleadoNombre = $usuario->apellido.", ".$usuario->nombre;
+                    }
+
+                    $detalle->sector = SectorEnum::GetDescription($detalle->sectorId);
+                    $detalle->estadoPedido = EstadoPedidoDetalleEnum::GetDescription($detalle->estadoId);
+                  }
+                  $pedido->productos= $listaDetalle;
+                }
+              } 
+              
             }
-            $payload = json_encode(array("lista Pedidos" => $listaMozo));
+           
+            $payload = json_encode(array("lista Pedidos socio" => $lista));
             $response->getBody()->write($payload);
           }
           catch(PDOException $e)
@@ -214,48 +276,26 @@ class PedidoController extends Pedido implements IApiUsable
               $error = json_encode(array("mensaje" => "Error al traer Los pedidos: ".$e->getMessage()));
               $response->getBody()->write($error);
           }
+
           break;
+     
         case PerfilUsuarioEnum::cocinero:
-          try{
-            $lista = Pedido::ObtenerPorSector(SectorEnum::cocina);
-            $payload = json_encode(array("lista Pedidos" => $lista));
-            $response->getBody()->write($payload);
-          }
-          catch(PDOException $e)
-          {
-              $error = json_encode(array("mensaje" => "Error al traer Los pedidos: ".$e->getMessage()));
-              $response->getBody()->write($error);
-          }
+          $lista = $this->DevolverListaDetallesPedidosPorSector(SectorEnum::cocina);
+
           break;
         case PerfilUsuarioEnum::bartender:
+          $lista = $this->DevolverListaDetallesPedidosPorSector(SectorEnum::tragosYvinosEntrada);
+
           break;
+
         case PerfilUsuarioEnum::cervecero:
+          $lista = $this->DevolverListaDetallesPedidosPorSector(SectorEnum::cervezasPatioTrasero);
           break;
 
       }
 
-    
-
-      return $response
-        ->withHeader('Content-Type', 'application/json');
-    }
-
-    //vista por sector
-    public function TraerPorSector($request, $response, $args)
-    {
-      try{
-        $lista = Pedido::obtenerTodos();
-
-
-        $payload = json_encode(array("lista Pedidos" => $lista));
-        $response->getBody()->write($payload);
-      }
-      catch(PDOException $e)
-      {
-          $error = json_encode(array("mensaje" => "Error al traer Los pedidos: ".$e->getMessage()));
-          $response->getBody()->write($error);
-      }
-
+      $payload = json_encode(array("lista Pedidos" => $lista));
+      $response->getBody()->write($payload);
       return $response
         ->withHeader('Content-Type', 'application/json');
     }
@@ -301,6 +341,20 @@ class PedidoController extends Pedido implements IApiUsable
       $mensaje = json_encode(array("mensaje" => "Descarga exitosa."));
           $response->getBody()->write($mensaje);
           return $response;  
+    }
+
+    private function DevolverListaDetallesPedidosPorSector($sectorId)
+    {
+      $lista = DetallePedido::ObtenerPedidosDetallePorSector($sectorId);
+      if($lista)
+      {
+        foreach($lista as $detalle)
+        {
+          $detalle->estadoDetalle = EstadoPedidoDetalleEnum::GetDescription($detalle->estadoId);
+        }
+      }
+
+      return $lista;
     }
 
     //  public function PdfAlquileres($request, $response, $args)

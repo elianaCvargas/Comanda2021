@@ -4,7 +4,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  use Psr\Http\Server\RequestHandlerInterface as Handler;
  use Slim\Psr7\Response as Response;
 
-class ValidatorMW
+class ValidatorMWasfa
 {
     public static function VerificarParamsLogin(Request $request,Handler $handler)
     {

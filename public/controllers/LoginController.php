@@ -17,8 +17,7 @@ class LoginController
       {
         $datos = array('usuario' => $usuario, 'perfil' => $usuariofromDb->tipoUsuarioId, 'usuarioId' => $usuariofromDb->id);
         $request = $request->withAttribute('usuarioId', $usuariofromDb->id);
-        // $empleadoId = $request->getAttribute('usuarioId');
-        // var_dump($empleadoId);
+
         $token = AuthTokenMW::CrearToken($datos);
         $payload = json_encode(array('jwt' => $token));
 

@@ -38,30 +38,55 @@ class Pedido
         
     }
 
+
     public static function obtenerTodos()
     {
         $hoy = DateHelper::DateAMD();
+        // var_dump($hoy);
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta(
-            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, m.estado, pro.sectorId, pro.descripcion, p.empleadoId as mozoId, dp.empleadoId as empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
+            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, u.nombre, u.apellido, m.estado, p.empleadoId as mozoId, p.fecha   FROM pedidos p
             INNER JOIN usuarios u on u.id = p.empleadoId
-            INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
             INNER JOIN mesas m on m.id = p.mesaId
-            INNER JOIN productos pro on pro.id = dp.productoid
-            WHERE fecha =:hoy
-            ORDER BY p.id, pro.sectorId, fecha");
+            WHERE p.fecha =:hoy && m.estado != 4
+            ORDER BY p.id, m.estado, p.fecha");
 
             $consulta->bindValue(':hoy', $hoy."%");
 
             $consulta->execute();
-            return $consulta->fetchAll(PDO::FETCH_CLASS, 'SocioPedidoView');
+            return $consulta->fetchAll(PDO::FETCH_CLASS, 'PedidoDashboardView');
         }
         catch(PDOException $e)
         {
             throw $e;
         }
     }
+
+    // public static function obtenerTodos()
+    // {
+    //     $hoy = DateHelper::DateAMD();
+    //     try{
+    //         $objAccesoDatos = AccesoDatos::obtenerInstancia();
+    //         $consulta = $objAccesoDatos->prepararConsulta(
+    //         "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, m.estado, pro.sectorId, pro.descripcion, p.empleadoId as mozoId, dp.empleadoId as empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
+    //         INNER JOIN usuarios u on u.id = p.empleadoId
+    //         INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
+    //         INNER JOIN mesas m on m.id = p.mesaId
+    //         INNER JOIN productos pro on pro.id = dp.productoid
+    //         WHERE fecha =:hoy
+    //         ORDER BY p.id, pro.sectorId, fecha");
+
+    //         $consulta->bindValue(':hoy', $hoy."%");
+
+    //         $consulta->execute();
+    //         return $consulta->fetchAll(PDO::FETCH_CLASS, 'SocioPedidoView');
+    //     }
+    //     catch(PDOException $e)
+    //     {
+    //         throw $e;
+    //     }
+    // }
 
     public static function ObtenerPorSector($sectorId)
     {
@@ -101,7 +126,7 @@ class Pedido
            
             INNER JOIN productos pro on pro.id = dp.productoid
             WHERE p.empleadoId = :empleadoId && fecha =:hoy && (dp.estadoId != 4 || dp.estadoId != 5)
-            order by p.id, dp.estadoId
+            order by p.id, dp.estadoId, pro.sectorId
            ");
             $consulta->bindValue(':empleadoId', intval($empleadoId), PDO::PARAM_INT);
             $consulta->bindValue(':hoy', DateHelper::DateAMD()."%");

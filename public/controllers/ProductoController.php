@@ -13,11 +13,11 @@ class ProductoController extends Producto implements IApiUsable
         $parametros = $request->getParsedBody();
 
         $descripcion = $parametros['descripcion'];
-        $tipoProductoId = $parametros['tipoProductoId'];
+        $precioUnitario = $parametros['precioUnitario'];
         $sectorId = $parametros['sectorId'];
 
         $prod = new Producto();
-        $prod->ToProducto($descripcion, intval($tipoProductoId), intval($sectorId));
+        $prod->ToProducto($descripcion, $precioUnitario, intval($sectorId));
         try
         {
           $listaProductos = $prod->ObtenerTodos();

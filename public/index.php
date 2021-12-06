@@ -57,14 +57,23 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
       ->add(\ValidatorMW::class . ':CheckEmpleados')->add(\AuthTokenMW::class . ':AutenticarUsuario');
       
     $group->post('/fotos', \PedidoController::class . ':CargarFoto')->add(\ValidatorMW::class . ':CheckPerfilMozoYCliente')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+
     $group->post('[/]', \PedidoController::class . ':CargarUno')
       ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
     $group->get('/descarga-csv', \PedidoController::class . ':DownloadCSV');
     $group->get('/recibo-pdf', \PedidoController::class . ':DownloadPdf');
     
+    $group->post('/tomar-pedido', \PedidoController::class . ':TomarPedidoDetalle')
+      ->add(\ValidatorMW::class . ':CheckEmpleadosParaTomarPedido')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+    $group->post('/modificar-pedido', \PedidoController::class . ':ModificarEstadoPedidoDetalle')
+      ->add(\ValidatorMW::class . ':CheckEmpleadosParaTomarPedido')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
-    
+    //entregar y  cancelar solo lo puede hacer el  mozo
+    $group->post('/entregar-pedido', \PedidoController::class . ':EntregarPedidoDetalle')
+      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+    $group->post('/cancelar-pedido', \PedidoController::class . ':EntregarPedidoDetalle')
+      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
   });
 
   $app->group('/credenciales', function (RouteCollectorProxy $group) {

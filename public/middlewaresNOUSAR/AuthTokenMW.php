@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  use Psr\Http\Server\RequestHandlerInterface as Handler;
  use Slim\Psr7\Response as Response;
 
-class AuthTokenMW
+class AuthTokenMWadsf
 {
     private static $claveSecreta = 'T3sT$JWT';
     private static $tipoEncriptacion = ['HS256'];

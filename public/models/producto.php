@@ -4,7 +4,7 @@ class Producto
 {
     public $id;
     public $descripcion;
-    public $tipoProductoId;
+    public $precioUnitario;
     public $sectorId;
 
     public function crearProducto()
@@ -12,10 +12,10 @@ class Producto
         try 
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (descripcion, tipoProductoId, sectorId) VALUES (:descripcion, :tipoProductoId, :sectorId)");
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (descripcion, sectorId, precioUnitario) VALUES (:descripcion, :sectorId, :precioUnitario)");
             $consulta->bindValue(':descripcion', $this->descripcion, PDO::PARAM_STR);
-            $consulta->bindValue(':tipoProductoId', $this->tipoProductoId, PDO::PARAM_INT);
             $consulta->bindValue(':sectorId', $this->sectorId, PDO::PARAM_INT);
+            $consulta->bindValue(':precioUnitario', $this->precioUnitario);
             $consulta->execute();
 
             return $objAccesoDatos->obtenerUltimoId();
@@ -78,17 +78,16 @@ class Producto
     //     $consulta->execute();
     // }
 
-    public  function ToProducto($descripcion, $tipoProductoId, $sectorId)
+    public  function ToProducto($descripcion, $precioUnitario, $sectorId)
     {
         $this->descripcion = $descripcion;
-        $this->tipoProductoId = $tipoProductoId;
+        $this->precioUnitario = $precioUnitario;
         $this->sectorId = $sectorId;
     }
 
     public function ProductoCompare($productoA, $productoB)
     {
         return $productoA->descripcion === $productoB->descripcion 
-        && $productoA->sectorId == $productoB->sectorId
-        && $productoA->tipoProductoId == $productoB->tipoProductoId;
+        && $productoA->sectorId == $productoB->sectorId;
     }
 }
