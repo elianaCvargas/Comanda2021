@@ -53,7 +53,7 @@ class PedidoController extends Pedido implements IApiUsable
             if($productoDb)
             {
               echo "probar esto en  controllerde crear pedido";
-              $pedido->precioTotal = $pedido->precioTotal + $productoDb->precioUnitario;
+              $pedido->precio = $pedido->precio + $productoDb->precioUnitario;
               $pedidoDetalle->ToDetallePedido(intval($ultimoIdFromPedido) , $fecha, EstadoPedidoDetalleEnum::pendiente, intval($productoDb->id) , intval($decodedProducto->cantidad) );
               try{
                 $pedidoDetalle->crearPedidoDetalle($pedidoDetalle);
@@ -85,45 +85,6 @@ class PedidoController extends Pedido implements IApiUsable
         $pedidoId = $parametros['pedidoId'];
         $productos = $parametros['productos'];
       
-        // // try
-        // // {
-        // //   Mesa::ModificarEstado(EstadoMesaEnum::esperandoPedido, $mesaId);
-        // // }
-        // // catch(PDOException $e){
-        // //   $error = json_encode(array("mensaje" => "Error al modificar el estado de la mesa: ".$e->getMessage()));
-        // //   $response->getBody()->write($error);
-        // // }
-
-        // $fecha = date("Y/m/d h:i:sa");
-        // try
-        // {
-        //   $ultimoIdFromPedido = $pedido->crearPedido();
-        // }
-        // catch(PDOException $e){
-        //   $error = json_encode(array("mensaje" => "Error al crear el pedido: ".$e->getMessage()));
-        //   $response->getBody()->write($error);
-        // }
-       
-        // foreach($productos as $producto)
-        // {
-        //     $pedidoDetalle = new DetallePedido();
-
-        //     $productoString = json_encode($producto);
-        //     $decodedProducto = json_decode($productoString);
-        //     $productoDb = Producto::obtenerProducto($decodedProducto->id);
-        //     $pedidoDetalle->ToDetallePedido(intval($ultimoIdFromPedido) , $fecha, EstadoPedidoEnum::pendiente, intval($productoDb->id) , intval($decodedProducto->cantidad) );
-        //     try{
-        //       $pedidoDetalle->crearPedidoDetalle($pedidoDetalle);
-        //       $payload = json_encode(array("mensaje" => "Pedido creado con exito"));
-        //       $response->getBody()->write($payload);
-        //       return $response
-        //           ->withHeader('Content-Type', 'application/json');
-        //     }
-        //     catch(PDOException $e){
-        //       $error = json_encode(array("mensaje" => "Error al crear el detalle del pedido: ".$e->getMessage()));
-        //       $response->getBody()->write($error);
-        //     }
-        // }
     }
 
     public function TomarPedidoDetalle($request, $response, $args)
@@ -332,16 +293,16 @@ class PedidoController extends Pedido implements IApiUsable
           return $response;
     }
 
-    public function DownloadPdf($request, $response, $args)
-    {
-      $parametros = $request->getQueryParams();
-      $pedidoId = $parametros['pedidoId'];
-      $recibo = Pedido::BucarPedidoParaRecibo($pedidoId);
-      var_dump($recibo);
-      $mensaje = json_encode(array("mensaje" => "Descarga exitosa."));
-          $response->getBody()->write($mensaje);
-          return $response;  
-    }
+    // public function DownloadPdf($request, $response, $args)
+    // {
+    //   $parametros = $request->getQueryParams();
+    //   $pedidoId = $parametros['pedidoId'];
+    //   $recibo = Pedido::BucarPedidoParaRecibo($pedidoId);
+    //   var_dump($recibo);
+    //   $mensaje = json_encode(array("mensaje" => "Descarga exitosa."));
+    //       $response->getBody()->write($mensaje);
+    //       return $response;  
+    // }
 
     private function DevolverListaDetallesPedidosPorSector($sectorId)
     {
@@ -357,44 +318,51 @@ class PedidoController extends Pedido implements IApiUsable
       return $lista;
     }
 
-    //  public function PdfAlquileres($request, $response, $args)
-    // {
-    //   $parametros = $request->getQueryParams();
-    //    $desde = $parametros['desde'];
-    //    $hasta = $parametros['hasta'];
+     public function DownloadPdf($request, $response, $args)
+    {
+      $parametros = $request->getQueryParams();
+       $pedidoId = $parametros['pedidoId'];
 
-    //   $alquileres = Alquiler::TraerEntreFechas($desde, $hasta);
-    //   if($alquileres)
-    //   { 
-    //     //convierto los datos en lista de string
-    //     $datos = [];
-    //     foreach($alquileres as $alquiler)
-    //     {
-    //       $nombreFinalUsuario = $alquiler->usuario;
-    //       $val = "Cliente: ".$nombreFinalUsuario."  -  Estilo: ".$alquiler->estilo."  -  Cantidad dias: ".$alquiler->cantidadDias."\n";
-    //       array_push($datos, $val);
-    //     }
+      $pedidoCabecera = Pedido::obtenerParaRecidoPorPedidoId($pedidoId);
 
+      $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false, true);
+      $pdf->addPage();
+      $pdf->write(0,"Pedido:    ".$pedidoCabecera->codigoPedido."\n");
+      $pdf->write(1,"Mesa:     ".$pedidoCabecera->codigoMesa."\n");
+      $pdf->write(2, 'Precio total: '."$".$pedidoCabecera->precio."\n");
 
-    //     $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false, true);
-    //     $pdf->addPage();
-    //     $pdf->write(0, 'Alquieleres'."\n");
-    //     for ($i = 1; $i < count($datos) + 1; $i++)
-    //     {
-    //         $pdf->write($i, $datos[$i]);
+      $detallesPedido = DetallePedido::ObtenerFullDataPedidosDetalle($pedidoId);
+      $datos = [];
+
+      if($pedidoCabecera &&  $detallesPedido)
+      { 
+        foreach($detallesPedido as $detalle)
+        {
+         
+          $val = "        -   Producto: ".$detalle->descripcion."  -  Cantidad: ".$detalle->cantidad."  -  Precio: "."$".$detalle->cantidad * $detalle->precio."\n";
+          array_push($datos, $val);
+        }
+
+        $indicePdf = 3;
+        for ($i = 0; $i < count($datos) ; $i++)
+        {
+           
+            $pdf->write($indicePdf, $datos[$i]);
+            $indicePdf++;
             
-    //     }
-    //     // Render and return pdf content as string
-    //     $content = $pdf->output('doc.pdf', 'S');
+        }
+        // Render and return pdf content as string
+        $content = $pdf->output('doc.pdf', 'S');
 
-    //     $response->getBody()->write($content);
+        $response->getBody()->write($content);
 
-    //     $response = $response
-    //         ->withHeader('Content-Type', 'application/pdf')
-    //         ->withHeader('Content-Disposition', 'attachment; filename="filename.pdf"');
+        $response = $response
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', 'attachment; filename="filename.pdf"');
 
-    //     return $response;
-    //   }
+        return $response;
+       }
+    }
 
     
 }

@@ -21,6 +21,9 @@ abstract class SectorEnum
             case 4:
                 return "CandyBar";//postres artesanales
                 break;
+            case 5:
+                return "Mesas";//para el  mozo
+                break;
             default:
             break;
         }

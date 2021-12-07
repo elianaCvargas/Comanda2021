@@ -1,22 +1,22 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '8d7fc9953aecb2fbd706915af38fb9033dce35b9',
+        'reference' => 'baccc2896d63082c98bf2b4a9b892a3bb823a30f',
         'name' => '__root__',
         'dev' => true,
     ),
     'versions' => array(
         '__root__' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '8d7fc9953aecb2fbd706915af38fb9033dce35b9',
+            'reference' => 'baccc2896d63082c98bf2b4a9b892a3bb823a30f',
             'dev_requirement' => false,
         ),
         'fig/http-message-util' => array(
@@ -228,6 +228,15 @@
             'install_path' => __DIR__ . '/../symfony/polyfill-php80',
             'aliases' => array(),
             'reference' => '1100343ed1a92e3a38f9ae122fc0eb21602547be',
+            'dev_requirement' => false,
+        ),
+        'tecnickcom/tcpdf' => array(
+            'pretty_version' => '6.4.2',
+            'version' => '6.4.2.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../tecnickcom/tcpdf',
+            'aliases' => array(),
+            'reference' => '172540dcbfdf8dc983bc2fe78feff48ff7ec1c76',
             'dev_requirement' => false,
         ),
         'vlucas/phpdotenv' => array(

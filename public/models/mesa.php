@@ -31,7 +31,7 @@ class Mesa
     {
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas");
+            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas WHERE estado = 5");
             $consulta->execute();
             return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
         }
@@ -46,6 +46,22 @@ class Mesa
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas WHERE mesaId = :mesaId");
         $consulta->bindValue(':mesaId', $mesaId, PDO::PARAM_INT);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Pedido');
+    }
+
+    public static function ObtenerMesaPorDetallePedido($detallePedidoId)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT * FROM mesas m 
+            inner join pedidos p on p.mesaId = m.id
+            inner join detallesPedidos dp on dp.pedidoId = p.id
+            where dp.id =:detallePedidoId
+            ");
+
+        $consulta->bindValue(':detallePedidoId', $detallePedidoId, PDO::PARAM_INT);
         $consulta->execute();
 
         return $consulta->fetchObject('Pedido');

@@ -19,7 +19,7 @@ class DetallePedido
         try 
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO detallesPedidos 
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidosdetalle 
                       (estadoId, pedidoId, empleadoId, tiempoEstimado, cantidad, productoId) 
             VALUES (:estadoId, :pedidoId, :empleadoId, :tiempoEstimado, :cantidad, :productoId,)");
             $consulta->bindValue(':estadoId', $this->estadoId, PDO::PARAM_INT);
@@ -62,7 +62,7 @@ class DetallePedido
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
 
             $consulta = $objAccesoDatos->prepararConsulta(
-                "SELECT p.sectorId, p.descripcion, dp.cantidad, dp.empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, dp.tiempoEntrega FROM detallesPedidos dp
+                "SELECT p.sectorId, p.descripcion, dp.cantidad, dp.empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, dp.tiempoFinal, p.precio FROM pedidosdetalle dp
                 INNER JOIN productos p on p.id = dp.productoId
                 WHERE dp.pedidoId =:pedidoId
                 ");
@@ -83,7 +83,7 @@ class DetallePedido
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             //estado 1 = pendiente
             $consulta = $objAccesoDatos->prepararConsulta(
-                "SELECT p.sectorId, p.descripcion, dp.cantidad, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, dp.tiempoEntrega FROM detallesPedidos dp
+                "SELECT p.sectorId, p.descripcion, dp.cantidad, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, dp.tiempoFinal FROM pedidosdetalle dp
                 INNER JOIN productos p on p.id = dp.productoId
                 WHERE p.sectorId =:sectorId 
                 ");
@@ -104,7 +104,7 @@ class DetallePedido
             $tiempoInicial = DateHelper::FullDateHMS();
            $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta(
-            "UPDATE detallesPedidos SET estadoId = :estadoId, empleadoId = :empleadoId, tiempoEstimado = :tiempoEstimado, tiempoInicial = :tiempoInicial  
+            "UPDATE pedidosdetalle SET estadoId = :estadoId, empleadoId = :empleadoId, tiempoEstimado = :tiempoEstimado, tiempoInicial = :tiempoInicial  
             WHERE id = :detallePedidoId");
             $consulta->bindValue(':estadoId', $estadoId, PDO::PARAM_INT);
             $consulta->bindValue(':tiempoEstimado', $tiempoEstimado, PDO::PARAM_INT);
@@ -126,7 +126,7 @@ class DetallePedido
             $tiempoInicial = DateHelper::FullDateHMS();
            $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta(
-            "UPDATE detallesPedidos SET estadoId = :estadoId 
+            "UPDATE pedidosdetalle SET estadoId = :estadoId 
             WHERE id = :detallePedidoId");
             $consulta->bindValue(':estadoId', $estadoId, PDO::PARAM_INT);
             $consulta->bindValue(':detallePedidoId', $detallePedidoId, PDO::PARAM_INT);
@@ -141,14 +141,14 @@ class DetallePedido
     public static function EntregarPedido($estadoId, $detallePedidoId)
     {
         try{
-            $tiempoEntrega = DateHelper::FullDateHMS();
+            $tiempoFinal = DateHelper::FullDateHMS();
            $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta(
-            "UPDATE detallesPedidos SET estadoId = :estadoId, tiempoEntrega = :tiempoEntrega
+            "UPDATE pedidosdetalle SET estadoId = :estadoId, tiempoFinal = :tiempoFinal
             WHERE id = :detallePedidoId");
             $consulta->bindValue(':estadoId', $estadoId, PDO::PARAM_INT);
             $consulta->bindValue(':detallePedidoId', $detallePedidoId, PDO::PARAM_INT);
-            $consulta->bindValue(':tiempoEntrega', $tiempoEntrega);
+            $consulta->bindValue(':tiempoFinal', $tiempoFinal);
             $consulta->execute(); 
         }
         catch(PDOException $e)

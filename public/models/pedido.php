@@ -1,6 +1,7 @@
 <?php
 require_once './views/pedidoDetalleCSV.php';
 require_once './cross/dateHelper.php';
+require_once './views/recibo.php';
 
 class Pedido
 {
@@ -63,30 +64,29 @@ class Pedido
         }
     }
 
-    // public static function obtenerTodos()
-    // {
-    //     $hoy = DateHelper::DateAMD();
-    //     try{
-    //         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-    //         $consulta = $objAccesoDatos->prepararConsulta(
-    //         "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, m.estado, pro.sectorId, pro.descripcion, p.empleadoId as mozoId, dp.empleadoId as empleadoId, dp.estadoId, dp.tiempoEstimado, dp.tiempoInicial, p.fecha   FROM pedidos p
-    //         INNER JOIN usuarios u on u.id = p.empleadoId
-    //         INNER JOIN detallesPedidos dp on dp.PedidoId = p.id
-    //         INNER JOIN mesas m on m.id = p.mesaId
-    //         INNER JOIN productos pro on pro.id = dp.productoid
-    //         WHERE fecha =:hoy
-    //         ORDER BY p.id, pro.sectorId, fecha");
+    public static function ObtenerParaRecidoPorPedidoId($pedidoId)
+    {
+        $hoy = DateHelper::DateAMD();
+        // var_dump($hoy);
+        try{
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, u.nombre, u.apellido, m.estado, p.empleadoId as mozoId, p.fecha , p.precio  FROM pedidos p
+            INNER JOIN usuarios u on u.id = p.empleadoId
+            INNER JOIN mesas m on m.id = p.mesaId
+            WHERE   p.id =:pedidoId
+            ORDER BY p.id, m.estado, p.fecha");
 
-    //         $consulta->bindValue(':hoy', $hoy."%");
+            $consulta->bindValue(':pedidoId', $pedidoId);
 
-    //         $consulta->execute();
-    //         return $consulta->fetchAll(PDO::FETCH_CLASS, 'SocioPedidoView');
-    //     }
-    //     catch(PDOException $e)
-    //     {
-    //         throw $e;
-    //     }
-    // }
+            $consulta->execute();
+            return $consulta->fetchObject('Recibo');
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+        }
+    }
 
     public static function ObtenerPorSector($sectorId)
     {
@@ -172,10 +172,12 @@ class Pedido
         return $consulta->fetchObject('Pedido');
     }
 
-    public static function obtenerPedido($pedidoId)
+    public static function ObtenerPedido($pedidoId)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE pedidoId = :pedidoId");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos 
+        
+        WHERE pedidoId = :pedidoId");
         $consulta->bindValue(':pedidoId', $pedidoId, PDO::PARAM_INT);
         $consulta->execute();
 
@@ -191,7 +193,7 @@ class Pedido
         $consulta->execute();
     }
 
-    public static function obtenerTodosDetalle()
+    public static function ObtenerTodosDetalle()
     {
 
         try{

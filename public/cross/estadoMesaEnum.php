@@ -13,13 +13,13 @@ abstract class EstadoMesaEnum
         switch($intValue)
         {
             case 1:
-                return "Esperando pedido";
+                return "Con cliente esperando pedido";
                 break;
             case 2:
-                return "Comiendo";
+                return "Con cliente comiendo";
                 break;
             case 3:
-                return "Pagando";
+                return "Con cliente pagando";
                 break;
             case 4:
                 return "Cerrado";

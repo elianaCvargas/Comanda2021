@@ -12,4 +12,5 @@ class DetallePedidoDashboardView
     public $tiempoEstimado;
     public $tiempoInicial;
     public $tiempoEntrega;
+    public $precio;
 }

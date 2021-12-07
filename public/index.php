@@ -14,13 +14,15 @@ require_once './controllers/LoginController.php';
 require_once './controllers/PedidoController.php';
 require_once './db/AccesoDatos.php';
 require_once './middlewares/ValidatorMW.php';
+require_once './middlewares/LoggerMW.php';
 require_once './middlewares/AuthTokenMW.php';
+require_once './controllers/EncuestaController.php';
+require_once './controllers/ReporteController.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 $app = AppFactory::create();
-// $app->setBasePath('/public');
 $app->addRoutingMiddleware();
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
@@ -50,12 +52,16 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   $app->group('/mesas', function (RouteCollectorProxy $group) {
     $group->post('[/]', \MesaController::class . ':CargarUno');
     $group->get('[/]', \MesaController::class . ':TraerTodos');
+    $group->post('/actualizar-estado', \MesaController::class . ':ModificarUno')
+      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');;
+
+
   });
 
   $app->group('/pedidos', function (RouteCollectorProxy $group) {
     $group->get('[/]', \PedidoController::class . ':TraerTodos')
       ->add(\ValidatorMW::class . ':CheckEmpleados')->add(\AuthTokenMW::class . ':AutenticarUsuario');
-      
+
     $group->post('/fotos', \PedidoController::class . ':CargarFoto')->add(\ValidatorMW::class . ':CheckPerfilMozoYCliente')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
     $group->post('[/]', \PedidoController::class . ':CargarUno')
@@ -63,7 +69,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
 
     $group->get('/descarga-csv', \PedidoController::class . ':DownloadCSV');
     $group->get('/recibo-pdf', \PedidoController::class . ':DownloadPdf');
-    
+
     $group->post('/tomar-pedido', \PedidoController::class . ':TomarPedidoDetalle')
       ->add(\ValidatorMW::class . ':CheckEmpleadosParaTomarPedido')->add(\AuthTokenMW::class . ':AutenticarUsuario');
     $group->post('/modificar-pedido', \PedidoController::class . ':ModificarEstadoPedidoDetalle')
@@ -76,15 +82,46 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
       ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
   });
 
-  $app->group('/credenciales', function (RouteCollectorProxy $group) {
-    //conviene hacer un middle que valide los datos de usuarios y devuelva un token 
-    $group->get('[/]', \UsuarioController::class . ':TraerTodos');
-  });
-  //->add(\MiClase::class . ':Login')
+  // $app->group('/credenciales', function (RouteCollectorProxy $group) {
+  //   $group->get('[/]', \UsuarioController::class . ':TraerTodos');
+  // });
 
   $app->group('/login', function (RouteCollectorProxy $group) {
     $group->post('[/]', \LoginController::class . ':Login');
   });
-// Run app
+
+  /* ENCUESTAS */
+  $app->group('/encuestas', function (RouteCollectorProxy $group) {
+    $group->post('[/]', \EncuestaController::class . ':CargarUno');
+    $group->get('/{id}', \EncuestaController::class . ':TraerUno');
+    $group->get('[/]', \EncuestaController::class . ':TraerTodos');
+  });
+
+  /* REPORTES */
+  $app->group('/reportes', function (RouteCollectorProxy $group) {
+    /* Reportes - Empleados */
+    $group->get('/empleados/login', \ReporteController::class . ':ReporteEmpleadosLogin');
+    $group->get('/empleados/sectores', \ReporteController::class . ':ReportePorSector');
+    $group->get('/empleados/empleados_sectores', \ReporteController::class . ':ReportePorEmpleadoSector');
+    $group->get('/empleados/empleados', \ReporteController::class . ':ReportePorEmpleados');
+    /* Reportes - Pedidos */
+    //por si  quieren uno solo  hacemos un  top one
+    $group->get('/pedidos/mas_vendido', \ReporteController::class . ':ReportePedidosMasVendido');
+    $group->get('/pedidos/menos_vendido', \ReporteController::class . ':ReportePedidosMenosVendido');
+    //pedidos no entregados en  tiempo  y  forma
+    $group->get('/pedidos/tiempo_estipulado', \ReporteController::class . ':ReportePedidosEntregaVencida');
+    $group->get('/pedidos/cancelados', \ReporteController::class . ':ReportePedidosCancelados');
+    /* Reportes - Mesas */
+    $group->get('/mesas/mas_usada', \ReporteController::class . ':ReporteMesasPorMayorUso');
+    $group->get('/mesas/menos_usada', \ReporteController::class . ':ReporteMesasPorMenorUso');
+    $group->get('/mesas/mas_facturo', \ReporteController::class . ':ReporteMesasPorMayorFacturacion');
+    $group->get('/mesas/menos_facturo', \ReporteController::class . ':ReporteMesasPorMenorFacturacion');
+    $group->get('/mesas/mayor_importe', \ReporteController::class . ':ReporteMesasPorMayorImporte');
+    $group->get('/mesas/menor_importe', \ReporteController::class . ':ReporteMesasPorMenorImporte');
+    $group->get('/mesas/entre_fechas', \ReporteController::class . ':ReporteMesasPorFacturaEntreFechas');
+    $group->get('/mesas/mejor_comentario', \ReporteController::class . ':ReporteMesasPorMejorComentario');
+    $group->get('/mesas/peor_comentario', \ReporteController::class . ':ReporteMesasPorPeorComentario');
+  });
+
 $app->run();
 
