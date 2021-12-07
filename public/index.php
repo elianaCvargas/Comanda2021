@@ -127,6 +127,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   { 
     $response->getBody()->write("Hola, esto es una prueba");
     return $response;
+    
   });
 
 $app->run();
