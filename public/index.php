@@ -123,5 +123,11 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('/mesas/peor_comentario', \ReporteController::class . ':ReporteMesasPorPeorComentario');
   });
 
+  $app->post('[/]', function($request, $response)
+  { 
+    $response->getBody()->write("Hola, esto es una prueba");
+    return $response;
+  });
+
 $app->run();
 
