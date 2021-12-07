@@ -24,6 +24,7 @@ $dotenv->load();
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
+$app->setBasePath("/public");
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 $app->addBodyParsingMiddleware();
@@ -127,7 +128,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
   { 
     $response->getBody()->write("Hola, esto es una prueba");
     return $response;
-    
+
   });
 
 $app->run();
