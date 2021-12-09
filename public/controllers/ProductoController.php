@@ -13,11 +13,11 @@ class ProductoController extends Producto implements IApiUsable
         $parametros = $request->getParsedBody();
 
         $descripcion = $parametros['descripcion'];
-        $precioUnitario = $parametros['precioUnitario'];
+        $precio = $parametros['precio'];
         $sectorId = $parametros['sectorId'];
 
         $prod = new Producto();
-        $prod->ToProducto($descripcion, $precioUnitario, intval($sectorId));
+        $prod->ToProducto($descripcion, $precio, intval($sectorId));
         try
         {
           $listaProductos = $prod->ObtenerTodos();
@@ -77,7 +77,30 @@ class ProductoController extends Producto implements IApiUsable
 
     public function ModificarUno($request, $response, $args)
     {
+      $parametros = $request->getParsedBody();
 
+      $productoId = $parametros['productoId'];
+      $descripcion = $parametros['descripcion'];
+      $sectorId = $parametros['sectorId'];
+      $precio = $parametros['precio'];
+
+      $producto = new Producto();
+      $producto->precio = $precio;
+      $producto->descripcion = $descripcion;
+      $producto->sectorId = $sectorId;
+      try{
+        Producto::Modificar($producto);
+        $payload = json_encode(array("lista Mesas" => "Mesa actualizada."));
+        $response->getBody()->write($payload);
+      }
+      catch(PDOException $e)
+      {
+          $error = json_encode(array("mensaje" => "Error al traer Las mesas: ".$e->getMessage()));
+          $response->getBody()->write($error);
+      }  
+        
+      return $response
+        ->withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args)
@@ -112,6 +135,7 @@ class ProductoController extends Producto implements IApiUsable
         $producto->descripcion = $listaproductos[$i][0];
         $producto->tipoProductoId = ProductoTipoEnum::GetEnumerator($listaproductos[$i][1]);
         $producto->sectorId = SectorEnum::GetEnumerator($listaproductos[$i][2]);
+        $producto->precio = $listaproductos[$i][3];
 
          if(!$this->VerificarSiExisteProducto($producto))
         {

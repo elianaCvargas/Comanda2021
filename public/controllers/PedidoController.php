@@ -52,8 +52,8 @@ class PedidoController extends Pedido implements IApiUsable
             $productoDb = Producto::obtenerProducto($decodedProducto->id);
             if($productoDb)
             {
-              echo "probar esto en  controllerde crear pedido";
-              $pedido->precio = $pedido->precio + $productoDb->precioUnitario;
+              // echo "probar esto en  controllerde crear pedido";
+              $pedido->precio = $pedido->precio + $productoDb->precio;
               $pedidoDetalle->ToDetallePedido(intval($ultimoIdFromPedido) , $fecha, EstadoPedidoDetalleEnum::pendiente, intval($productoDb->id) , intval($decodedProducto->cantidad) );
               try{
                 $pedidoDetalle->crearPedidoDetalle($pedidoDetalle);
@@ -139,7 +139,7 @@ class PedidoController extends Pedido implements IApiUsable
            $response->getBody()->write($error);
          }
 
-         $payload = json_encode(array("mensaje" => "Pedido actualizado."));
+         $payload = json_encode(array("mensaje" => "Pedido cancelado."));
          $response->getBody()->write($payload);
          return $response
            ->withHeader('Content-Type', 'application/json');
@@ -318,6 +318,23 @@ class PedidoController extends Pedido implements IApiUsable
       return $lista;
     }
 
+    public function pedidosDetallesPorPedidoId($request, $response, $args)
+    {
+      $parametros = $request->getQueryParams();
+      //  $nombreCliente = $parametros['nombreCliente'];
+       $pedidoId = $parametros['pedidoId'];
+      $lista = DetallePedido::ObtenerFullDataPedidosDetalle($pedidoId);
+      foreach($lista as $detalle)
+      {
+        $detalle->estadoDetalle = EstadoPedidoDetalleEnum::GetDescription($detalle->estadoId);
+      }
+      $payload = json_encode(array("lista Pedidos" => $lista));
+      $response->getBody()->write($payload);
+      return $response
+        ->withHeader('Content-Type', 'application/json');
+    }
+
+    
      public function DownloadPdf($request, $response, $args)
     {
       $parametros = $request->getQueryParams();
@@ -362,6 +379,8 @@ class PedidoController extends Pedido implements IApiUsable
 
         return $response;
        }
+       
+       
     }
 
     

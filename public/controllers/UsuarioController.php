@@ -75,7 +75,18 @@ class UsuarioController extends Usuario implements IApiUsable
     {
       try{
         $lista = Usuario::obtenerTodos();
-        $payload = json_encode(array("listaUsuario" => $lista));
+        $sinclave = [];
+        foreach($lista as $usuario)
+        {
+          $usuarioNew= new Usuario();
+          $usuarioNew->ToUsuario( $usuario->nombre,  $usuario->apellido,  $usuario->usuario, null,  $usuario->tipoUsuarioId);
+          $usuarioNew->id = $usuario->id;
+          array_push($sinclave, $usuarioNew);
+        }
+
+        $payload = json_encode(array("listaUsuario" => $sinclave));
+
+       
 
         $response->getBody()->write($payload);
       }

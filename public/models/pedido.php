@@ -10,7 +10,7 @@ class Pedido
     public $mesaId;
     public $nombreCliente;
     public $foto;
-    public $precioTotal;
+    public $precio;
     public $fecha;
     public $empleadoId;
 
@@ -20,14 +20,15 @@ class Pedido
         try 
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (codigo, mesaId, nombreCliente, empleadoId, fecha) 
-            VALUES (:codigo, :mesaId, :nombreCliente, :empleadoId, :fecha)");
+            // INSERT INTO mesas (codigo, numeroMesa, estado) VALUES (:codigo, :numeroMesa, :estado)
+            // $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO mesas (codigo, numeroMesa, estado) VALUES (:codigo, :numeroMesa, :estado)");
+            // var_dump($this);
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidos (codigo, mesaId, nombreCliente, empleadoId, fecha) VALUES (:codigo, :mesaId, :nombreCliente, :empleadoId, :fecha)");
             $consulta->bindValue(':codigo', $this->codigo, PDO::PARAM_STR);
             $consulta->bindValue(':mesaId', $this->mesaId, PDO::PARAM_INT);
             $consulta->bindValue(':nombreCliente', $this->nombreCliente, PDO::PARAM_STR);
             $consulta->bindValue(':empleadoId', $this->empleadoId, PDO::PARAM_INT);
-            $consulta->bindValue(':fecha', $this->fecha);
+            $consulta->bindValue(':fecha', DateHelper::DateAMD());
             $consulta->execute();
 
             return $objAccesoDatos->obtenerUltimoId();
@@ -50,7 +51,7 @@ class Pedido
             "SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, u.nombre, u.apellido, m.estado, p.empleadoId as mozoId, p.fecha   FROM pedidos p
             INNER JOIN usuarios u on u.id = p.empleadoId
             INNER JOIN mesas m on m.id = p.mesaId
-            WHERE p.fecha =:hoy && m.estado != 4
+            WHERE CAST(p.fecha AS DATE) =:hoy && m.estado != 4
             ORDER BY p.id, m.estado, p.fecha");
 
             $consulta->bindValue(':hoy', $hoy."%");
@@ -99,7 +100,7 @@ class Pedido
             INNER JOIN mesas m on m.id = p.mesaId
             INNER JOIN productos pro on pro.id = dp.productoid
             WHERE pro.sectorId = :sectorId
-            WHERE fecha =:hoy
+            WHERE CAST(fecha AS DATE) =:hoy
             ORDER BY dp.estadoId");
             $consulta->bindValue(':sectorId', $sectorId, PDO::PARAM_INT);
             $consulta->bindValue(':hoy', DateHelper::DateAMD()."%");
@@ -198,7 +199,7 @@ class Pedido
 
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, c.nombre, c.apellido, c.email as emailCliente, u.usuario as emailMozo, p.precioTotal, p.fecha   FROM pedidos p
+            $consulta = $objAccesoDatos->prepararConsulta("SELECT p.id, p.codigo as codigoPedido, m.codigo as codigoMesa, c.nombre, c.apellido, c.email as emailCliente, u.usuario as emailMozo, p.precio, p.fecha   FROM pedidos p
             INNER JOIN usuarios u on u.id = p.empleadoId
             INNER JOIN clientes c on c.id = p.clienteId
             INNER JOIN mesas m on m.id = p.mesaId

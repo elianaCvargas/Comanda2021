@@ -14,7 +14,7 @@ class MesaController extends Mesa implements IApiUsable
         $numeroMesa = $parametros['numeroMesa'];
 
         $mesa = new Mesa();
-        $mesa->ToMesa($codigo, intval($numeroMesa), EstadoMesaEnum::cerrada);
+        $mesa->ToMesa($codigo, intval($numeroMesa), EstadoMesaEnum::disponible);
         try
         {
           $listaMesas = $mesa->obtenerTodos();

@@ -119,7 +119,58 @@ class ValidatorMW
     {
       $response = new Response();
       $perfil = $request->getAttribute('perfil');
-      if($perfil =! PerfilUsuarioEnum::cliente && $perfil =! PerfilUsuarioEnum::socio)
+      if($perfil == PerfilUsuarioEnum::cliente || $perfil == PerfilUsuarioEnum::socio || $perfil == PerfilUsuarioEnum::mozo)
+      {
+          $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+          return $response;
+      }else {
+         return $handler->handle($request);
+      }
+      
+      $response->getBody()
+      ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
+      return $response;  
+    }
+
+    public static function CheckCocinero(Request $request,Handler $handler)
+    {
+      $response = new Response();
+      $perfil = $request->getAttribute('perfil');
+      if($perfil == PerfilUsuarioEnum::cocinero)
+      {
+          $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+          return $response;
+      }else {
+         return $handler->handle($request);
+      }
+      
+      $response->getBody()
+      ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
+      return $response;  
+    }
+
+    public static function CheckBartender(Request $request,Handler $handler)
+    {
+      $response = new Response();
+      $perfil = $request->getAttribute('perfil');
+      if($perfil == PerfilUsuarioEnum::bartender)
+      {
+          $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
+          return $response;
+      }else {
+         return $handler->handle($request);
+      }
+      
+      $response->getBody()
+      ->write(json_encode(array("message" => 'El usuario ingresado no esta registrado')));
+      return $response;  
+    }
+
+    public static function CheckCervecero(Request $request,Handler $handler)
+    {
+      $response = new Response();
+      $perfil = $request->getAttribute('perfil');
+      if($perfil == PerfilUsuarioEnum::cervecero)
       {
           $response->getBody()->write(json_encode(array("message" => 'No tiene permisos')));
           return $response;

@@ -31,7 +31,7 @@ class Mesa
     {
         try{
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas WHERE estado = 5");
+            $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM mesas");
             $consulta->execute();
             return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
         }

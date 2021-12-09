@@ -4,7 +4,7 @@ class Producto
 {
     public $id;
     public $descripcion;
-    public $precioUnitario;
+    public $precio;
     public $sectorId;
 
     public function crearProducto()
@@ -12,10 +12,31 @@ class Producto
         try 
         {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (descripcion, sectorId, precioUnitario) VALUES (:descripcion, :sectorId, :precioUnitario)");
+            $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO productos (descripcion, sectorId, precio) VALUES (:descripcion, :sectorId, :precio)");
             $consulta->bindValue(':descripcion', $this->descripcion, PDO::PARAM_STR);
             $consulta->bindValue(':sectorId', $this->sectorId, PDO::PARAM_INT);
-            $consulta->bindValue(':precioUnitario', $this->precioUnitario);
+            $consulta->bindValue(':precio', $this->precio);
+            $consulta->execute();
+
+            return $objAccesoDatos->obtenerUltimoId();
+        }
+        catch(PDOException $e)
+        {
+            throw $e;
+            // echo ''Error: '' .$e->getMessage() . ''<br/> '';
+        }
+        
+    }
+
+    public function Modificar($producto)
+    {
+        try 
+        {
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta("UPDATE productos SET descripcion = :descripcion, sectorId = :sectorId, precio = :precio  WHERE id = :id");
+            $consulta->bindValue(':descripcion', $producto->descripcion, PDO::PARAM_STR);
+            $consulta->bindValue(':sectorId', $producto->sectorId, PDO::PARAM_INT);
+            $consulta->bindValue(':precio', $producto->precio);
             $consulta->execute();
 
             return $objAccesoDatos->obtenerUltimoId();
@@ -58,30 +79,11 @@ class Producto
         }
     }
 
-    // public static function modificarUsuario($nombre, $id)
-    // {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET usuario = :usuario, clave = :clave WHERE id = :id");
-    //     $consulta->bindValue(':usuario', $nombre, PDO::PARAM_STR);
-    //     // $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
-    //     $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-    //     $consulta->execute();
-    // }
 
-    // public static function borrarUsuario($usuario)
-    // {
-    //     $objAccesoDato = AccesoDatos::obtenerInstancia();
-    //     $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET fechaBaja = :fechaBaja WHERE id = :id");
-    //     $fecha = new DateTime(date("d-m-Y"));
-    //     $consulta->bindValue(':id', $usuario, PDO::PARAM_INT);
-    //     $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
-    //     $consulta->execute();
-    // }
-
-    public  function ToProducto($descripcion, $precioUnitario, $sectorId)
+    public  function ToProducto($descripcion, $precio, $sectorId)
     {
         $this->descripcion = $descripcion;
-        $this->precioUnitario = $precioUnitario;
+        $this->precio = $precio;
         $this->sectorId = $sectorId;
     }
 

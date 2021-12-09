@@ -24,7 +24,7 @@ $dotenv->load();
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
-$app->setBasePath("/public");
+// $app->setBasePath("/public");
 
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 $app->addBodyParsingMiddleware();
@@ -32,6 +32,13 @@ $app->get('/', function (Request $request, Response $response, $args) {
     $response->getBody()->write("hola alumnos de los lunes!");
     return $response;
 });
+
+// $app->post('[/]', function(Request $request, Response $response, $args)
+// { 
+//   $response->getBody()->write("Hola, esto es una prueba");
+//   return $response;
+
+// });
 
 // peticiones
 $app->group('/usuarios', function (RouteCollectorProxy $group) {
@@ -47,6 +54,8 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('[/]', \ProductoController::class . ':TraerTodos');
 
     $group->post('/carga-csv', \ProductoController::class . ':LoadCSV');
+    // $group->put('/update', \ProductoController::class . ':ModificarUno');
+
 
   });
 
@@ -54,7 +63,7 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->post('[/]', \MesaController::class . ':CargarUno');
     $group->get('[/]', \MesaController::class . ':TraerTodos');
     $group->post('/actualizar-estado', \MesaController::class . ':ModificarUno')
-      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');;
+      ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
 
   });
@@ -79,8 +88,9 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     //entregar y  cancelar solo lo puede hacer el  mozo
     $group->post('/entregar-pedido', \PedidoController::class . ':EntregarPedidoDetalle')
       ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
-    $group->post('/cancelar-pedido', \PedidoController::class . ':EntregarPedidoDetalle')
+    $group->post('/cancelar-pedido', \PedidoController::class . ':CancelarPedidoDetalle')
       ->add(\ValidatorMW::class . ':CheckPerfilMozo')->add(\AuthTokenMW::class . ':AutenticarUsuario');
+      $group->get('/a', \PedidoController::class . ':pedidosDetallesPorPedidoId');
   });
 
   // $app->group('/credenciales', function (RouteCollectorProxy $group) {
@@ -122,14 +132,9 @@ $app->group('/usuarios', function (RouteCollectorProxy $group) {
     $group->get('/mesas/entre_fechas', \ReporteController::class . ':ReporteMesasPorFacturaEntreFechas');
     $group->get('/mesas/mejor_comentario', \ReporteController::class . ':ReporteMesasPorMejorComentario');
     $group->get('/mesas/peor_comentario', \ReporteController::class . ':ReporteMesasPorPeorComentario');
-  });
+  })->add(\ValidatorMW::class . ':CheckPerfilSocio')->add(\AuthTokenMW::class . ':AutenticarUsuario');
 
-  $app->post('[/]', function($request, $response)
-  { 
-    $response->getBody()->write("Hola, esto es una prueba");
-    return $response;
 
-  });
 
 $app->run();
 

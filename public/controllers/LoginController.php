@@ -16,6 +16,7 @@ class LoginController
       $fecha = DateHelper::DateAMD();
       
       $usuariofromDb =  Usuario::obtenerUsuarioPorUsuarioYClave($usuario, $clave);
+      // var_dump($usuariofromDb);
       if($usuariofromDb)
       {
         $datos = array('usuario' => $usuario, 'perfil' => $usuariofromDb->tipoUsuarioId, 'usuarioId' => $usuariofromDb->id);

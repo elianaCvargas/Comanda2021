@@ -8,6 +8,7 @@ class LogUsuarioDb extends LogUsuarios
     {
         try 
         {
+            // var_dump($logUsuario->nombre);
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO logUsuarios (usuarioId, nombre, apellido,fecha, perfil) VALUES (:usuarioId, :nombre, :apellido, :fecha, :perfil)");
             $consulta->bindValue(':apellido', $logUsuario->apellido, PDO::PARAM_STR);

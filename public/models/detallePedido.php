@@ -18,10 +18,11 @@ class DetallePedido
     {
         try 
         {
+
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO pedidosdetalle 
                       (estadoId, pedidoId, empleadoId, tiempoEstimado, cantidad, productoId) 
-            VALUES (:estadoId, :pedidoId, :empleadoId, :tiempoEstimado, :cantidad, :productoId,)");
+            VALUES (:estadoId, :pedidoId, :empleadoId, :tiempoEstimado, :cantidad, :productoId)");
             $consulta->bindValue(':estadoId', $this->estadoId, PDO::PARAM_INT);
             $consulta->bindValue(':pedidoId', $this->pedidoId, PDO::PARAM_INT);
             $consulta->bindValue(':empleadoId', $this->empleadoId, PDO::PARAM_INT);

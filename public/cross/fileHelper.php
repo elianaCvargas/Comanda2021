@@ -64,14 +64,7 @@ class File
         }
         else
         {
-            // while(!feof($file))
-            // {
-            //     $retorno = fgetcsv($file);
-            //     // var_dump($retorno);
-            //     array_push($lineas, $retorno);
-            //     return $lineas;
-            // }
-            // read each line in CSV file at a time
+
             while (($row = fgetcsv($file)) !== false) {
                 $lineas[] = $row;
             }
@@ -123,6 +116,40 @@ class File
             else { echo "No es un una imagen"; }
         }  
         else { echo "No se ingresó una imagen"; }           
+    }
+
+    public static function GuardarImagenBetter($imagen, $nombre, $nombreOtro, $fecha, $oldPath)
+    {
+        $extension = pathinfo($imagen["name"], PATHINFO_EXTENSION);
+        $fechaStr = str_replace('/', '-', $fecha);
+        $imagen["name"] = $nombre."-".$nombreOtro."-".$fechaStr.".".$extension;
+        $moveTo = $_SERVER['DOCUMENT_ROOT']."\cross\imagenes\\";
+        $fullPath =  $moveTo.$imagen["name"];
+
+       if($oldPath == null)
+       {
+            if(strlen($imagen["name"] > 0))
+            {
+                if(File::VerificarExtension($extension))
+                {
+                    move_uploaded_file($imagen["tmp_name"], $fullPath);
+                    return  $fullPath;
+                }
+                else { echo "No es un una imagen"; }
+            }  
+            else { echo "No se ingresó una imagen"; }  
+       }
+       else
+       {
+
+
+            $moveOldImageTo = $_SERVER['DOCUMENT_ROOT']."\cross\backup\\";
+            $bkFullPath =  $moveOldImageTo."bk_".$imagen["name"];
+            rename($oldPath, $bkFullPath);
+            move_uploaded_file($imagen["tmp_name"], $fullPath);
+            return $fullPath;
+       }
+                 
     }
 
     private static function VerificarExtension($name)
